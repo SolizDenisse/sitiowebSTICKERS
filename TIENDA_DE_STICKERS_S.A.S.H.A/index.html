@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Stickers 🎨</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <nav>
+                <h1>StickerShop</h1>
+                <ul>
+                    <li><a href="#">Inicio</a></li>
+                    <li><a href="#">Productos</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </nav>
+        </header>
+        <div class="main-layout">
+            <main>
+                <div class="category-filters">
+                    <button class="filter-btn active" data-category="all">Todos</button>
+                    <button class="filter-btn" data-category="anime">Anime</button>
+                    <button class="filter-btn" data-category="manga">Manga</button>
+                    <button class="filter-btn" data-category="videojuegos">Videojuegos</button>
+                    <button class="filter-btn" data-category="comics">Comics</button>
+                    <button class="filter-btn" data-category="series">Series</button>
+                    <button class="filter-btn" data-category="otros">Otros</button>
+                </div>
+
+                <div class="search-container">
+                    <input type="search" id="search-bar" placeholder="Buscar por nombre, categoría, #hashtag...">
+                </div>
+
+                <h2>Nuestros Stickers</h2>
+                <section class="product-grid">
+                    <!-- El contenido de los productos se generará con JavaScript -->
+
+                </section> 
+
+                <!-- Sección de Comentarios -->
+                <section class="comments-section">
+                    <h2>💬 Comentarios de la Comunidad 💬</h2>
+                    <form id="comment-form">
+                        <div class="form-group">
+                            <textarea id="comment-input" placeholder="¡Deja un comentario sobre la tienda!" rows="3" required></textarea>
+                            <button type="submit" id="submit-comment-btn">Enviar Comentario</button>
+                        </div>
+                        <small id="comment-cooldown-msg" style="display: none;"></small>
+                    </form>
+                    <div id="comments-list"></div>
+                </section>
+
+            </main>
+
+            <aside class="cart">
+                <div class="cart-header">
+                    <h2>Tu Carrito 🛒</h2>
+                    <button id="clear-cart-btn" title="Vaciar carrito">🗑️</button>
+                </div>
+                <ul id="cart-items">
+                    </ul>
+                <p class="total">Total: <span id="cart-total">Bs 0.00</span></p>
+                <button id="checkout-btn">Pagar</button>
+            </aside>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2025 StickerShop. Todos los derechos reservados.</p>
+                <button id="admin-login-btn">Admin</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de Detalles del Producto (inicialmente oculto) -->
+    <div id="product-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <img id="modal-img" src="" alt="Imagen del producto">
+                <div class="modal-details">
+                    <h2 id="modal-name"></h2>
+                    <p id="modal-description"></p>
+                    <p id="modal-sku" style="color: #888; font-size: 0.9em;"></p>
+                    <div id="modal-hashtags" class="modal-hashtags"></div>
+                    <p id="modal-price" class="price"></p>
+                    <div class="quantity-selector">
+                        <button class="quantity-btn" data-action="decrease">-</button>
+                        <input type="number" id="modal-quantity" value="1" min="1">
+                        <button class="quantity-btn" data-action="increase">+</button>
+                    </div>
+                    <button id="modal-add-to-cart" class="add-to-cart">Añadir al carrito</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Proceso de Pago -->
+    <div id="checkout-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button id="checkout-modal-close-btn" class="modal-close-btn">&times;</button>
+            <div class="checkout-layout">
+                <div class="checkout-form-container">
+                    <h2>Información de Entrega</h2>
+                    <form id="checkout-form">
+                        <div class="form-group">
+                            <label for="customer-name">Nombre Completo:</label>
+                            <input type="text" id="customer-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">Celular:</label>
+                            <input type="tel" id="customer-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-department">Departamento:</label>
+                            <select id="customer-department" required>
+                                <option value="">Selecciona un departamento</option>
+                                <option value="Beni">Beni</option>
+                                <option value="Chuquisaca">Chuquisaca</option>
+                                <option value="Cochabamba">Cochabamba</option>
+                                <option value="La Paz">La Paz</option>
+                                <option value="Oruro">Oruro</option>
+                                <option value="Pando">Pando</option>
+                                <option value="Potosi">Potosí</option>
+                                <option value="Santa Cruz">Santa Cruz</option>
+                                <option value="Tarija">Tarija</option>
+                            </select>
+                        </div>
+                        <!-- Este campo solo aparecerá para Cochabamba -->
+                        <div id="pickup-location-group" class="form-group">
+                            <label for="pickup-location">Lugar de Recojo:</label>
+                            <select id="pickup-location">
+                                <option value="Plaza Principal">Plaza Principal</option>
+                                <option value="Plaza Bolivar">Plaza Bolivar</option>
+                                <option value="Parque Lincoln">Parque Lincoln</option>
+                                <option value="Plaza de la Patria">Plaza de la Patria</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="order-summary">
+                    <h3>Resumen del Pedido</h3>
+                    <ul id="checkout-item-list"></ul>
+                    <div class="summary-totals">
+                        <div class="summary-row"><span>Subtotal:</span><span id="checkout-subtotal"></span></div>
+                        <div class="summary-row"><span>Envío:</span><span id="checkout-shipping"></span></div>
+                        <div class="summary-row final-total"><span>TOTAL:</span><span id="checkout-final-total"></span></div>
+                    </div>
+                    <button type="submit" form="checkout-form" id="whatsapp-redirect-btn" class="add-to-cart">Confirmar y Pagar por WhatsApp</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal del Panel de Administración -->
+    <div id="admin-panel-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content admin-panel">
+            <button id="admin-panel-close-btn" class="modal-close-btn">&times;</button>
+            <h2>Panel de Administración</h2>
+            <div class="admin-layout">
+                <!-- Columna para Añadir/Editar Stickers -->
+                <div class="admin-form-container">
+                    <h3 id="admin-form-title">Añadir Nuevo Sticker</h3>
+                    <form id="add-sticker-form">
+                        <input type="hidden" id="sticker-edit-id">
+                        <input type="text" id="sticker-sku" placeholder="SKU (ej: STK-001)" required>
+                        <input type="text" id="sticker-name" placeholder="Nombre del Sticker" required>
+                        <input type="number" id="sticker-price" placeholder="Precio (ej: 2.50)" step="0.01" required>
+                        <select id="sticker-category" required>
+                            <option value="">-- Elige una categoría --</option>
+                            <option value="anime">Anime</option>
+                            <option value="manga">Manga</option>
+                            <option value="videojuegos">Videojuegos</option>
+                            <option value="comics">Comics</option>
+                            <option value="series">Series</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                        <input type="text" id="sticker-hashtags" placeholder="Hashtags (ej: #cute #cat)">
+                        <textarea id="sticker-description" placeholder="Descripción del sticker" rows="3"></textarea>
+                        <input type="url" id="sticker-image" placeholder="URL de la imagen" required>
+                        <button type="submit" id="sticker-form-submit-btn">Añadir Sticker</button>
+                    </form>
+                </div>
+                <!-- Columna para la Lista de Stickers -->
+                <div class="admin-list-container">
+                    <h3>Catálogo Actual</h3>
+                    <input type="search" id="admin-sticker-search" placeholder="Buscar en catálogo...">
+                    <div id="admin-stickers-list"></div>
+                </div>
+            </div>
+            
+            <!-- Sección de Moderación de Comentarios -->
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #dcbff5;">
+                <h3>📝 Moderación de Comentarios</h3>
+                <div id="admin-comments-list" style="border: 1px solid #ccc; border-radius: 5px; padding: 15px; max-height: 500px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
