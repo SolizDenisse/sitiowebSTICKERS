@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const LAST_COMMENT_TIME_KEY = 'stickerShopLastCommentTime';
     let cart = {};
     let allStickers = [];
+    let cooldownInterval = null; // Para manejar el intervalo del cooldown
     let comments = [];
     let userVotes = {};
     let ownedCommentIds = [];
@@ -395,10 +396,12 @@ document.addEventListener('DOMContentLoaded', () => {
         saveOwnedCommentIds();
         renderComments();
 
-        // Guarda el tiempo y deshabilita el formulario
+        // Guarda el tiempo del comentario y deshabilita el formulario
+        localStorage.setItem(LAST_COMMENT_TIME_KEY, Date.now());
         commentInput.value = '';
         checkCommentCooldown();
     }
+
 
     /**
      * Comprueba si el usuario puede comentar y actualiza la UI.
@@ -406,10 +409,50 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkCommentCooldown() {
         // Restricción eliminada: Aseguramos que el formulario siempre esté habilitado.
         submitCommentBtn.disabled = false;
-        commentInput.disabled = false;
-        cooldownMsg.style.display = 'none';
-    }
+        commentInput.disabled = false; // El input de texto permanece activo
+        cooldownMsg.style.display = 'none'; // Oculta el mensaje por defecto
 
+        const COOLDOWN_PERIOD = 12 * 60 * 60 * 1000; // 12 horas en milisegundos
+        const lastCommentTime = localStorage.getItem(LAST_COMMENT_TIME_KEY);
+
+        if (!lastCommentTime) {
+            return; // Si nunca ha comentado, puede hacerlo.
+        }
+
+        const now = Date.now();
+        const timeElapsed = now - parseInt(lastCommentTime, 10);
+        const timeRemaining = COOLDOWN_PERIOD - timeElapsed;
+
+        if (timeRemaining > 0) {
+            submitCommentBtn.disabled = true;
+            cooldownMsg.style.display = 'block';
+
+            // Limpia cualquier intervalo anterior para evitar múltiples contadores
+            if (cooldownInterval) clearInterval(cooldownInterval);
+
+            const updateMessage = () => {
+                const newTimeRemaining = COOLDOWN_PERIOD - (Date.now() - parseInt(lastCommentTime, 10));
+                if (newTimeRemaining <= 0) {
+                    clearInterval(cooldownInterval);
+                    checkCommentCooldown(); // Vuelve a verificar para habilitar el botón
+                } else {
+                    const hours = Math.floor(newTimeRemaining / (1000 * 60 * 60));
+                    const minutes = Math.floor((newTimeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((newTimeRemaining % (1000 * 60)) / 1000);
+
+                    let timeString = '';
+                    if (hours > 0) timeString += `${hours}h `;
+                    if (minutes > 0 || hours > 0) timeString += `${minutes}m `;
+                    timeString += `${seconds}s`;
+
+                    cooldownMsg.textContent = `¡Gracias por tu entusiasmo! 💖 Podrás volver a comentar en ${timeString}.`;
+                }
+            };
+
+            updateMessage(); // Llama una vez para mostrar el mensaje inmediatamente
+            cooldownInterval = setInterval(updateMessage, 1000); // Actualiza cada segundo
+        }
+    }
     /**
      * Maneja los clics en los botones de like/dislike.
      */
