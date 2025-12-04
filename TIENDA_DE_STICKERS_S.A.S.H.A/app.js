@@ -162,16 +162,24 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {number} [quantity=1] - La cantidad a añadir.
      */
     function addProductToCart(id, name, price, quantity = 1) {
-        if (cart[id]) {
+        const currentQuantity = cart[id] ? cart[id].quantity : 0;
+        const newQuantity = currentQuantity + quantity;
+    
+        if (newQuantity > 100) {
+            alert(`No puedes tener más de 100 unidades del sticker "${name}" en tu carrito.`);
+            // Si ya hay 98 y se intentan añadir 5, se añaden solo 2 para llegar a 100.
+            if (currentQuantity < 100) {
+                cart[id].quantity = 100;
+            }
+        } else if (cart[id]) {
             // Si el producto ya está en el carrito, incrementa la cantidad
-            cart[id].quantity += quantity;
+            cart[id].quantity = newQuantity;
         } else {
             // Si es un producto nuevo, lo añade al carrito
-            cart[id] = {
-                name: name,
-                price: price,
-                quantity: quantity
-            };
+            cart[id] = { name, price, quantity };
+        }
+    
+        if (cart[id]) {
         }
         // Actualiza la interfaz de usuario del carrito
         saveCart();
@@ -294,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="price">Bs ${sticker.price.toFixed(2)}</p>
                 <div class="quantity-selector card-quantity-selector">
                     <button class="quantity-btn" data-action="decrease">-</button>
-                    <input type="number" class="quantity-input" value="1" min="1">
+                    <input type="number" class="quantity-input" value="1" min="1" max="100">
                     <button class="quantity-btn" data-action="increase">+</button>
                 </div>
                 <button class="add-to-cart">Añadir al Carrito</button>
@@ -952,7 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentValue = parseInt(quantityInput.value, 10);
 
             if (action === 'increase') {
-                quantityInput.value = currentValue + 1;
+                if (currentValue < 100) quantityInput.value = currentValue + 1;
             } else if (action === 'decrease' && currentValue > 1) {
                 quantityInput.value = currentValue - 1;
             }
@@ -1067,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentValue = parseInt(modalQuantityInput.value, 10);
 
             if (action === 'increase') {
-                modalQuantityInput.value = currentValue + 1;
+                if (currentValue < 100) modalQuantityInput.value = currentValue + 1;
             } else if (action === 'decrease' && currentValue > 1) {
                 modalQuantityInput.value = currentValue - 1;
             }
